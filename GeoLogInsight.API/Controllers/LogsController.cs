@@ -12,9 +12,9 @@ public class LogsController : ControllerBase
             new LogEntry
             {
                 Ip = "8.8.8.8",
-                Endpoint = "api/orders",
+                Endpoint = "/api/orders",
                 StatusCode = 500,
-                RespinseTime = 320,
+                ResponseTime = 320,
                 Lat = -36.8485,
                 Lng = 174.7633 // Auckland
             }
