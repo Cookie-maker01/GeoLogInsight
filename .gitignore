@@ -1,0 +1,19 @@
+# Build results
+bin/
+obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# .NET
+*.dll
+*.pdb
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
