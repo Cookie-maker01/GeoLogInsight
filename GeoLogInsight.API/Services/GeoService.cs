@@ -18,14 +18,14 @@ public class GeoService
         try
         {
 
-            var url = $"https://ipapi.co/{ip}/json/";
+            var url = $"http://ip-api.com/json/{ip}";
 
             var response = await _httpClient.GetStringAsync(url);
 
             var json = JsonDocument.Parse(response);
 
-            var lat = json.RootElement.GetProperty("latitude").GetDouble();
-            var lng = json.RootElement.GetProperty("longitude").GetDouble();
+            var lat = json.RootElement.GetProperty("lat").GetDouble();
+            var lng = json.RootElement.GetProperty("lon").GetDouble();
 
             var result = (lat, lng);
 
@@ -35,7 +35,7 @@ public class GeoService
         }
         catch
         {
-            return (0, 0);
+            return (double.NaN, double.NaN);
         }
     }
 }
