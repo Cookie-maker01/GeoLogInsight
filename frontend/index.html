@@ -27,12 +27,14 @@
             data.forEach(log => {
                 const color = log.statusCode >= 500 ? 'red' : 'green';
 
+                console.log("marker:", log.lat, log.lng, color);
+
                 L.circleMarker([log.lat, log.lng], {
                     color : color,
                     radius: 8
                 })
                 .addTo(map)
-                .bindPopup(`${log.endpoint} (${log.statusCode})`);
+                .bindPopup(log.endpoint + " (" + log.statusCode + ")");
             });
         });
 </script>
