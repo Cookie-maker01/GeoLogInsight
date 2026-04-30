@@ -1,11 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
+using GeoLogInsight.API.Services;
 
 [ApiController]
 [Route("api/logs")]
 public class LogsController : ControllerBase
 {
+    private readonly GeoService _geoService = new GeoService();
+
     [HttpGet]
-    public IActionResult GetLogs()
+    public async Task<IActionResult> GetLogs()
     {
         var logs = new List<LogEntry>
         {
@@ -14,11 +17,23 @@ public class LogsController : ControllerBase
                 Ip = "8.8.8.8",
                 Endpoint = "/api/orders",
                 StatusCode = 500,
-                ResponseTime = 320,
-                Lat = -36.8485,
-                Lng = 174.7633 // Auckland
+                ResponseTime = 320
+            },
+            new LogEntry
+            {
+                Ip = "1.1.1.1",
+                Endpoint = "/api/users",
+                StatusCode = 200,
+                ResponseTime = 120
             }
         };
+
+        foreach (var log in logs)
+        {
+            var (lat, lng) = await _geoService.GetLocation(log.Ip);
+            log.Lat = lat;
+            log.Lng = lng;
+        }
 
         return Ok(logs);
     }
