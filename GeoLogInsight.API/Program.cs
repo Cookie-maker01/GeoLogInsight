@@ -3,6 +3,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Controller
 builder.Services.AddControllers();
 
+//Signal R
+builder.Services.AddSignalR();
+
 // Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -25,10 +28,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("AllowAll");
+
 app.UseHttpsRedirection();
 
 app.MapControllers();
 
-app.UseCors("AllowAll");
+app.MapHub<GeoLogInsight.API.Hubs.LogHub>("/logHub");
 
 app.Run();
