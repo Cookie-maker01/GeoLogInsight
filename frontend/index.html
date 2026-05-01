@@ -16,6 +16,8 @@
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+
 <script>
     const map = L.map('map').setView([-36.8485, 174.7633], 5);
 
@@ -34,9 +36,33 @@
                     radius: 8
                 })
                 .addTo(map)
-                .bindPopup(log.endpoint + " (" + log.statusCode + ")");
+                .bindPopup(`${log.endpoint} (${log.statusCode})`);
             });
         });
+
+    //SignalR realtime connection
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("http://localhost:5033/logHub")
+        .build();
+
+    connection.on("ReceiveLog", function (log) {
+
+        console.log("realtime data:", log);
+
+        const color = log.statusCode >= 500 ? 'red' : 'green';
+
+        L.circleMarker([log.lat, log.lng], {
+            color: color,
+            radius: 10
+        })
+        .addTo(map)
+        .bindPopup(`realtime: ${log.endpoint} (${log.statusCode})`);
+    });
+
+    connection.start()
+        .then(() => console.log("SignalR Connected"))
+        .catch(err => console.error("SignalR Failed:", err));
+
 </script>
 
 </body>
