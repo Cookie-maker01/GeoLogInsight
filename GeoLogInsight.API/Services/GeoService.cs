@@ -35,7 +35,11 @@ public class GeoService
         }
         catch
         {
-            return (double.NaN, double.NaN);
+            var random = new Random();
+            double lat = -36.8 + random.NextDouble() * 0.5;
+            double lng = 174.7 + random.NextDouble() * 0.5;
+
+            return (lat, lng);
         }
     }
 }
