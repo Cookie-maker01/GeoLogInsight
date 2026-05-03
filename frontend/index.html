@@ -60,7 +60,13 @@
     });
 
     connection.start()
-        .then(() => console.log("SignalR Connected"))
+        .then(() => {
+            console.log("SignalR Connected");
+
+            setInterval(() => {
+                fetch('http://localhost:5033/api/logs');
+            }, 3000);
+        })
         .catch(err => console.error("SignalR Failed:", err));
 
 </script>
