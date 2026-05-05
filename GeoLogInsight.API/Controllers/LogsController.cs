@@ -20,23 +20,23 @@ public class LogsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetLogs()
     {
-        var logs = new List<LogEntry>
+        var random = new Random();
+
+        var ips = new[] { "8.8.8.8", "1.1.1.1", "13.75.0.1", "172.217.0.0" };
+        var endpoints = new[] { "/api/orders", "/api/users", "/api/products" };
+
+        var logs = new List<LogEntry>();
+
+        for (int i =0; i < random.Next(1, 4); i++)
         {
-            new LogEntry
+            logs.Add(new LogEntry
             {
-                Ip = "8.8.8.8",
-                Endpoint = "/api/orders",
-                StatusCode = 500,
-                ResponseTime = 320
-            },
-            new LogEntry
-            {
-                Ip = "1.1.1.1",
-                Endpoint = "/api/users",
-                StatusCode = 200,
-                ResponseTime = 120
-            }
-        };
+                Ip = ips[random.Next(ips.Length)],
+                Endpoint = endpoints[random.Next(endpoints.Length)],
+                StatusCode = random.Next(0, 2) == 0 ? 200 : 500,
+                ResponseTime = random.Next(50, 500)
+            });
+        }
 
         foreach (var log in logs)
         {
