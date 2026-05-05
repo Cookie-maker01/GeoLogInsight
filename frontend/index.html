@@ -65,7 +65,7 @@
 
         //1.Heatmap
         const weight = log.statusCode >= 500 ? 1.0 : 0.3;
-        heatData.push([log.lat, log.log, weight]);
+        heatData.push([log.lat, log.lng, weight]);
         heat.setInterval(heatData);
 
         if(heatData.length > 200) {
