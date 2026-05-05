@@ -18,12 +18,30 @@
 
 <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
 
+<script src="https://unpkg.com/leaflet-ant-path/dist/leaflet-ant-path.min.js"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
 
 <script>
     const map = L.map('map').setView([-36.8485, 174.7633], 5);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {}).addTo(map);
+
+    const NZ = [-36.8485, 174.7633]; // Auckland
+
+    L.circleMarker(NZ, {
+        color: 'yellow',
+        redius: 10,
+    })
+    .addTo(map)
+    
+    setInterval(() => {
+        L.circleMarker(NZ, {
+            color: 'yellow',
+            radius: 15,
+            opacity: 0.3
+        }).addTo(map);
+    }, 1000);
 
     const heatData = [];
 
@@ -63,7 +81,29 @@
             return;
         }
 
-        //1.Heatmap
+        //1. Animation stream
+        if (log.statusCode >=500 && Math.random() <= 0.5) { 
+
+            const path = L.polyline.antPath(
+            [
+                [log.lat, log.lng],
+                NZ
+            ],
+            {
+                delay: 400,
+                dashArray: [10, 20],
+                weight: 3,
+                color: 'red',
+                pulseColor: '#FFFFFF'
+            }
+            ).addTo(map);
+
+            setTimeout(() => {
+            map.removeLayer(path);
+            }, 4000);
+        }
+
+        //2.Heatmap
         const weight = log.statusCode >= 500 ? 1.0 : 0.3;
         heatData.push([log.lat, log.lng, weight]);
         heat.setInterval(heatData);
@@ -74,7 +114,7 @@
 
         heat.setLatLngs(heatData);
 
-        //2.Marker
+        //3.Marker
         const color = log.statusCode >= 500 ? 'red' : 'green';
 
         L.circleMarker([log.lat, log.lng], {
