@@ -16,12 +16,22 @@
 
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
+<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
 
 <script>
     const map = L.map('map').setView([-36.8485, 174.7633], 5);
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {}).addTo(map);
+
+    const heatData = [];
+
+    const heat = L.heatLayer(heatData, {
+        radius: 25,
+        blur: 15,
+        maxZoom: 10
+    }).addTo(map);
 
     fetch('http://localhost:5033/api/logs')
         .then(res => res.json())
@@ -49,6 +59,22 @@
 
         console.log("realtime data:", log);
 
+        if(!log.lat || !log.lng || isNaN(log.lat) || isNaN(log.lng)){
+            return;
+        }
+
+        //1.Heatmap
+        const weight = log.statusCode >= 500 ? 1.0 : 0.3;
+        heatData.push([log.lat, log.log, weight]);
+        heat.setInterval(heatData);
+
+        if(heatData.length > 200) {
+            heatData.shift();
+        }
+
+        heat.setLatLngs(heatData);
+
+        //2.Marker
         const color = log.statusCode >= 500 ? 'red' : 'green';
 
         L.circleMarker([log.lat, log.lng], {
@@ -57,6 +83,12 @@
         })
         .addTo(map)
         .bindPopup(`realtime: ${log.endpoint} (${log.statusCode})`);
+
+       if(log.statusCode >=500 && Math.random() >0.7) {
+          map.flyTo([log.lat, log.lng], 5, {
+            duration: 1.5
+          });
+       } 
     });
 
     connection.start()
