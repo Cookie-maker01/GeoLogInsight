@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>GeoLog Dashboard></title>
+    <title>GeoLog Dashboard</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
         #map { 
@@ -14,6 +14,26 @@
 
 <div id="map"></div>
 
+<div id="dashboard" style="
+    position: absolute;
+    top:10px;
+    right: 10px;
+    background: white;
+    padding: 12px;
+    border-radius: 10px;
+    width:220px;
+    box-shadow: 0 2px 10px rgb(0,0,0,0.2);
+    z-index:1000;
+">
+    <h4 style="margin: 0 0 8px 0;">Stats</h4>
+
+    <div>Total: <span id="total">0</span></div>
+    <div>200 OK: <span id="ok">0</span></div>
+    <div>500 Error: <span id="error">0</span></div>
+
+    <canvas id="chart" width="200" height="150"></canvas>
+</div>
+
 <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
 <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
@@ -21,6 +41,8 @@
 <script src="https://unpkg.com/leaflet-ant-path/dist/leaflet-ant-path.min.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
     const map = L.map('map').setView([-36.8485, 174.7633], 5);
@@ -31,16 +53,21 @@
 
     L.circleMarker(NZ, {
         color: 'yellow',
-        redius: 10,
+        radius: 10,
     })
     .addTo(map)
+    .bindPopup("NZ Target");
     
     setInterval(() => {
-        L.circleMarker(NZ, {
-            color: 'yellow',
-            radius: 15,
-            opacity: 0.3
-        }).addTo(map);
+       const glow = L.circleMarker(NZ, {
+          color: 'yellow',
+          radius: 15,
+          opacity: 0.3
+       }).addTo(map);
+
+       setTimeout(() => {
+          map.removeLayer(golw);
+       }, 800);
     }, 1000);
 
     const heatData = [];
@@ -50,6 +77,27 @@
         blur: 15,
         maxZoom: 10
     }).addTo(map);
+
+    let total = 0;
+    let okCount = 0;
+    let errorCount = 0;
+
+    const ctx = document.getElementById('chart');
+
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['200 OK', '500 Error'],
+            datasets: [{
+                label: 'Requests',
+                data: [0, 0]
+            }]
+        },
+        options: {
+            responsive: false,
+            animation: false
+        }
+    });
 
     fetch('http://localhost:5033/api/logs')
         .then(res => res.json())
@@ -106,7 +154,7 @@
         //2.Heatmap
         const weight = log.statusCode >= 500 ? 1.0 : 0.3;
         heatData.push([log.lat, log.lng, weight]);
-        heat.setInterval(heatData);
+        // heat.setInterval(heatData);
 
         if(heatData.length > 200) {
             heatData.shift();
@@ -129,6 +177,21 @@
             duration: 1.5
           });
        } 
+
+       total++;
+
+       if (log.statusCode === 200) {
+          okCount++;
+       } else if (log.statusCode >= 500) {
+           errorCount++;
+       }
+
+       document.getElementById("total").innerText = total;
+       document.getElementById("ok").innerText = okCount;
+       document.getElementById("error").innerText = errorCount;
+
+       chart.data.datasets[0].data = [okCount, errorCount];
+       chart.update();
     });
 
     connection.start()
