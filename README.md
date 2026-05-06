@@ -39,10 +39,10 @@ Backend
 - Live stats panel updating in real time
 
 ##  Future Improvements
-Country-level aggregation
-Time-series chart (last 60s traffic)
-Authentication & role-based dashboards
-Deploy to cloud (Azure / AWS)
+- Country-level aggregation
+- Time-series chart (last 60s traffic)
+- Authentication & role-based dashboards
+- Deploy to cloud (Azure / AWS)
 
 ##  Author
 Cookie QU
